@@ -428,7 +428,7 @@ void* UPPER_BOUND_DEFAULT(void*, void*, void*, size_t,
         void (*sort)(struct _name * this,                                     \
                      int (*compare)(const _type*, const _type*));             \
     } _name;                                                                  \
-    _name* create_link_##_name();                                             \
+    _name* create_list_##_name();                                             \
     void insert_##_name(node_##_name* idx, _type elm) {                       \
         node_##_name* new_element = malloc(sizeof(node_##_name));             \
         new_element->v = elm;                                                 \
@@ -797,8 +797,8 @@ void* UPPER_BOUND_DEFAULT(void*, void*, void*, size_t,
         bool (*empty)(struct _name * this);                                    \
         void (*clear)(struct _name * this);                                    \
         void (*free)(struct _name * this);                                     \
-        void (*lowerbound)(struct _name * this, _type value);                  \
-        void (*upperbound)(struct _name * this, _type value);                  \
+        node_##_name* (*lowerbound)(struct _name * this, _type value);         \
+        node_##_name* (*upperbound)(struct _name * this, _type value);         \
     } _name;                                                                   \
     _name* create_set_##_name();                                               \
     void update_##_name(_name* set, size_t now) {                              \
@@ -1180,11 +1180,12 @@ void* UPPER_BOUND_DEFAULT(void*, void*, void*, size_t,
         void (*erase)(struct _name * this, _typeOfIndex idx);                  \
         bool (*count)(struct _name * this, _typeOfIndex idx);                  \
         _typeOfValue (*val)(struct _name * this, _typeOfIndex idx);            \
+        void (*set)(struct _name * this, _typeOfIndex idx, _typeOfValue elm);  \
         bool (*empty)(struct _name * this);                                    \
         void (*clear)(struct _name * this);                                    \
         void (*free)(struct _name * this);                                     \
-        void (*lowerbound)(struct _name * this, _typeOfIndex index);           \
-        void (*upperbound)(struct _name * this, _typeOfIndex index);           \
+        node_##_name* (*lowerbound)(struct _name * this, _typeOfIndex index);  \
+        node_##_name* (*upperbound)(struct _name * this, _typeOfIndex index);  \
     } _name;                                                                   \
     _name* create_map_##_name();                                               \
     void update_##_name(_name* map, size_t now) {                              \
@@ -1511,6 +1512,25 @@ void* UPPER_BOUND_DEFAULT(void*, void*, void*, size_t,
         }                                                                      \
         return NULL;                                                           \
     }                                                                          \
+    void set_##_name(_name* map, _typeOfIndex idx, _typeOfValue elm) {         \
+        size_t now = 0;                                                        \
+        while (map->tree[now].height != -1) {                                  \
+            if (map->tree[now].index == idx) {                                 \
+                map->tree[now].value = elm;                                    \
+                return;                                                        \
+            }                                                                  \
+            if (map->tree[now].index > idx)                                    \
+                if (map->tree[now].left != -1)                                 \
+                    now = map->tree[now].left;                                 \
+                else                                                           \
+                    break;                                                     \
+            else if (map->tree[now].right != -1)                               \
+                now = map->tree[now].right;                                    \
+            else                                                               \
+                break;                                                         \
+        }                                                                      \
+        return;                                                                \
+    }                                                                          \
     bool empty_##_name(_name* map) { return !(map->size); }                    \
     void clear_##_name(_name* map) {                                           \
         while (map->size) {                                                    \
@@ -1572,6 +1592,7 @@ void* UPPER_BOUND_DEFAULT(void*, void*, void*, size_t,
         map->erase = &erase_##_name;                                           \
         map->count = &count_##_name;                                           \
         map->val = &val_##_name;                                               \
+        map->set = &set_##_name;                                               \
         map->empty = &empty_##_name;                                           \
         map->clear = &clear_##_name;                                           \
         map->free = &free_##_name;                                             \
