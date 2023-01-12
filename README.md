@@ -232,10 +232,8 @@ Returns an iterator pointing to the first element that is greater than key
 Returns the number of elements in the container
 `setName->size;`
 ### map(WIP)
-:::danger
 It can't run now
 and I don't know why
-:::
 define the struct
 `Map(indexType, valueType, structName, compareFunctionofData);`
 declare the map
