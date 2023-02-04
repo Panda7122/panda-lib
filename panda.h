@@ -286,7 +286,7 @@ void* UPPER_BOUND_DEFAULT(void*, void*, void*, size_t,
                          : UPPER_BOUND_ERROR)))
 // vector
 #define Vector(_type, _name)                                              \
-    typedef struct {                                                      \
+    typedef struct _name {                                                \
         _type* data;                                                      \
         size_t size;                                                      \
         size_t capacity;                                                  \
@@ -407,7 +407,7 @@ void* UPPER_BOUND_DEFAULT(void*, void*, void*, size_t,
         struct node_##_name *pref, *nxt;                                      \
     } node_##_name;                                                           \
                                                                               \
-    typedef struct {                                                          \
+    typedef struct _name {                                                    \
         size_t size;                                                          \
         node_##_name first;                                                   \
         void (*insert)(node_##_name * idx, _type elm);                        \
@@ -546,7 +546,7 @@ void* UPPER_BOUND_DEFAULT(void*, void*, void*, size_t,
         struct node_##_name *pref, *nxt;                              \
     } node_##_name;                                                   \
                                                                       \
-    typedef struct {                                                  \
+    typedef struct _name {                                            \
         size_t size;                                                  \
         node_##_name first;                                           \
         void (*push)(struct _name * this, _type elm);                 \
@@ -604,7 +604,7 @@ void* UPPER_BOUND_DEFAULT(void*, void*, void*, size_t,
         struct node_##_name *pref, *nxt;                              \
     } node_##_name;                                                   \
                                                                       \
-    typedef struct {                                                  \
+    typedef struct _name {                                            \
         size_t size;                                                  \
         node_##_name first;                                           \
         void (*push)(struct _name * this, _type elm);                 \
@@ -660,7 +660,7 @@ void* UPPER_BOUND_DEFAULT(void*, void*, void*, size_t,
     }
 // priority_queue
 #define Priority_Queue(_type, _name, _cmp)                                  \
-    typedef struct {                                                        \
+    typedef struct _name {                                                  \
         _type* data;                                                        \
         size_t size;                                                        \
         size_t capacity;                                                    \
@@ -781,13 +781,13 @@ void* UPPER_BOUND_DEFAULT(void*, void*, void*, size_t,
     }
 // set
 #define Set(_type, _name, _cmp)                                                \
-    typedef struct {                                                           \
+    typedef struct node_##_name {                                              \
         _type value;                                                           \
         int64_t bf;                                                            \
         int64_t height;                                                        \
         int64_t left, right;                                                   \
     } node_##_name;                                                            \
-    typedef struct {                                                           \
+    typedef struct _name {                                                     \
         size_t size;                                                           \
         size_t capacity;                                                       \
         node_##_name* tree;                                                    \
@@ -1164,14 +1164,14 @@ void* UPPER_BOUND_DEFAULT(void*, void*, void*, size_t,
     }
 // map
 #define Map(_typeOfIndex, _typeOfValue, _name, _cmp)                           \
-    typedef struct {                                                           \
+    typedef struct node_##_name {                                              \
         int64_t bf;                                                            \
         int64_t height;                                                        \
         int64_t left, right;                                                   \
         _typeOfIndex index;                                                    \
         _typeOfValue value;                                                    \
     } node_##_name;                                                            \
-    typedef struct {                                                           \
+    typedef struct _name {                                                     \
         size_t size;                                                           \
         size_t capacity;                                                       \
         node_##_name* tree;                                                    \
@@ -1600,7 +1600,7 @@ void* UPPER_BOUND_DEFAULT(void*, void*, void*, size_t,
         map->upperbound = &upper_bound_##_name;                                \
         return map;                                                            \
     }
-//Treap
+// Treap
 #ifndef nullptr
 #define nullptr ((void*)0)
 #endif
@@ -1611,7 +1611,7 @@ void* UPPER_BOUND_DEFAULT(void*, void*, void*, size_t,
         _type treeKey;                                                         \
         int heapKey;                                                           \
     } node_##_name;                                                            \
-    typedef struct {                                                           \
+    typedef struct _name {                                                     \
         node_##_name* tree;                                                    \
         node_##_name* (*build)(struct _name * this, _type key);                \
         node_##_name* (*merge)(struct _name * this, node_##_name* a,           \
@@ -1620,30 +1620,30 @@ void* UPPER_BOUND_DEFAULT(void*, void*, void*, size_t,
                       node_##_name** a, node_##_name** b);                     \
     } _name;                                                                   \
     _name* create_treap_##_name();                                             \
-    node_##_name* build_##_name(struct _name* this, data key) {                \
+    node_##_name* build_##_name(struct _name* treap, data key) {               \
         node_##_name* ret = malloc(sizeof(node_##_name));                      \
         ret->leftNode = ret->rightNode = nullptr;                              \
         ret->treeKey = key;                                                    \
         ret->heapKey = rand();                                                 \
         return ret;                                                            \
     }                                                                          \
-    node_##_name* merge_##_name(struct _name* this, node_##_name* a,           \
+    node_##_name* merge_##_name(struct _name* treap, node_##_name* a,          \
                                 node_##_name* b) {                             \
         if (a == nullptr && b == nullptr) return nullptr;                      \
         if (a == nullptr) return b;                                            \
         if (b == nullptr) return a;                                            \
-        _pushDown(&(a->treeKey),                                               \
-                ((a->leftNode == nullptr) ? nullptr                            \
-                                            : (&(a->leftNode->treeKey))),      \
-                ((a->rightNode == nullptr) ? nullptr                           \
-                                            : (&(a->rightNode->treeKey))));    \
-        _pushDown(&(b->treeKey),                                               \
-                ((b->leftNode == nullptr) ? nullptr                            \
-                                            : (&(b->leftNode->treeKey))),      \
-                ((b->rightNode == nullptr) ? nullptr                           \
-                                            : (&(b->rightNode->treeKey))));    \
+        _pushDown(                                                             \
+            &(a->treeKey),                                                     \
+            ((a->leftNode == nullptr) ? nullptr : (&(a->leftNode->treeKey))),  \
+            ((a->rightNode == nullptr) ? nullptr                               \
+                                       : (&(a->rightNode->treeKey))));         \
+        _pushDown(                                                             \
+            &(b->treeKey),                                                     \
+            ((b->leftNode == nullptr) ? nullptr : (&(b->leftNode->treeKey))),  \
+            ((b->rightNode == nullptr) ? nullptr                               \
+                                       : (&(b->rightNode->treeKey))));         \
         if (a->heapKey < b->heapKey) {                                         \
-            a->rightNode = merge_##_name(this, a->rightNode, b);               \
+            a->rightNode = merge_##_name(treap, a->rightNode, b);              \
             _pullUp(&(a->treeKey),                                             \
                     ((a->leftNode == nullptr) ? nullptr                        \
                                               : (&(a->leftNode->treeKey))),    \
@@ -1651,7 +1651,7 @@ void* UPPER_BOUND_DEFAULT(void*, void*, void*, size_t,
                                                : (&(a->rightNode->treeKey)))); \
             return a;                                                          \
         }                                                                      \
-        b->leftNode = merge_##_name(this, a, b->leftNode);                     \
+        b->leftNode = merge_##_name(treap, a, b->leftNode);                    \
         _pullUp(                                                               \
             &(b->treeKey),                                                     \
             ((b->leftNode == nullptr) ? nullptr : (&(b->leftNode->treeKey))),  \
@@ -1659,7 +1659,7 @@ void* UPPER_BOUND_DEFAULT(void*, void*, void*, size_t,
                                        : (&(b->rightNode->treeKey))));         \
         return b;                                                              \
     }                                                                          \
-    void split_##_name(struct _name* this, node_##_name* cur, _type key,       \
+    void split_##_name(struct _name* treap, node_##_name* cur, _type key,      \
                        node_##_name** a, node_##_name** b) {                   \
         if (cur == nullptr) {                                                  \
             *a = nullptr;                                                      \
@@ -1674,7 +1674,7 @@ void* UPPER_BOUND_DEFAULT(void*, void*, void*, size_t,
                                          : (&(cur->rightNode->treeKey))));     \
         if (cmp(cur->treeKey, key)) {                                          \
             *a = cur;                                                          \
-            split_##_name(this, (*a)->rightNode, key, &((*a)->rightNode), b);  \
+            split_##_name(treap, (*a)->rightNode, key, &((*a)->rightNode), b); \
             _pullUp(                                                           \
                 &((*a)->treeKey),                                              \
                 (((*a)->leftNode == nullptr) ? nullptr                         \
@@ -1684,7 +1684,7 @@ void* UPPER_BOUND_DEFAULT(void*, void*, void*, size_t,
                      : (&((*a)->rightNode->treeKey))));                        \
         } else {                                                               \
             *b = cur;                                                          \
-            split_##_name(this, (*b)->leftNode, key, a, &((*b)->leftNode));    \
+            split_##_name(treap, (*b)->leftNode, key, a, &((*b)->leftNode));   \
             _pullUp(                                                           \
                 &((*b)->treeKey),                                              \
                 (((*b)->leftNode == nullptr) ? nullptr                         \
