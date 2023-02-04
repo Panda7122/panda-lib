@@ -1600,4 +1600,107 @@ void* UPPER_BOUND_DEFAULT(void*, void*, void*, size_t,
         map->upperbound = &upper_bound_##_name;                                \
         return map;                                                            \
     }
+//Treap
+#ifndef nullptr
+#define nullptr ((void*)0)
+#endif
+
+#define Treap(_type, _name, _cmp, _pullUp, _pushDown)                          \
+    typedef struct node_##_name {                                              \
+        struct node_##_name *leftNode, *rightNode;                             \
+        _type treeKey;                                                         \
+        int heapKey;                                                           \
+    } node_##_name;                                                            \
+    typedef struct {                                                           \
+        node_##_name* tree;                                                    \
+        node_##_name* (*build)(struct _name * this, _type key);                \
+        node_##_name* (*merge)(struct _name * this, node_##_name* a,           \
+                               node_##_name* b);                               \
+        void (*split)(struct _name * this, node_##_name* cur, _type key,       \
+                      node_##_name** a, node_##_name** b);                     \
+    } _name;                                                                   \
+    _name* create_treap_##_name();                                             \
+    node_##_name* build_##_name(struct _name* this, data key) {                \
+        node_##_name* ret = malloc(sizeof(node_##_name));                      \
+        ret->leftNode = ret->rightNode = nullptr;                              \
+        ret->treeKey = key;                                                    \
+        ret->heapKey = rand();                                                 \
+        return ret;                                                            \
+    }                                                                          \
+    node_##_name* merge_##_name(struct _name* this, node_##_name* a,           \
+                                node_##_name* b) {                             \
+        if (a == nullptr && b == nullptr) return nullptr;                      \
+        if (a == nullptr) return b;                                            \
+        if (b == nullptr) return a;                                            \
+        _pushDown(&(a->treeKey),                                               \
+                ((a->leftNode == nullptr) ? nullptr                            \
+                                            : (&(a->leftNode->treeKey))),      \
+                ((a->rightNode == nullptr) ? nullptr                           \
+                                            : (&(a->rightNode->treeKey))));    \
+        _pushDown(&(b->treeKey),                                               \
+                ((b->leftNode == nullptr) ? nullptr                            \
+                                            : (&(b->leftNode->treeKey))),      \
+                ((b->rightNode == nullptr) ? nullptr                           \
+                                            : (&(b->rightNode->treeKey))));    \
+        if (a->heapKey < b->heapKey) {                                         \
+            a->rightNode = merge_##_name(this, a->rightNode, b);               \
+            _pullUp(&(a->treeKey),                                             \
+                    ((a->leftNode == nullptr) ? nullptr                        \
+                                              : (&(a->leftNode->treeKey))),    \
+                    ((a->rightNode == nullptr) ? nullptr                       \
+                                               : (&(a->rightNode->treeKey)))); \
+            return a;                                                          \
+        }                                                                      \
+        b->leftNode = merge_##_name(this, a, b->leftNode);                     \
+        _pullUp(                                                               \
+            &(b->treeKey),                                                     \
+            ((b->leftNode == nullptr) ? nullptr : (&(b->leftNode->treeKey))),  \
+            ((b->rightNode == nullptr) ? nullptr                               \
+                                       : (&(b->rightNode->treeKey))));         \
+        return b;                                                              \
+    }                                                                          \
+    void split_##_name(struct _name* this, node_##_name* cur, _type key,       \
+                       node_##_name** a, node_##_name** b) {                   \
+        if (cur == nullptr) {                                                  \
+            *a = nullptr;                                                      \
+            *b = nullptr;                                                      \
+            return;                                                            \
+        }                                                                      \
+        _pushDown(                                                             \
+            &(cur->treeKey),                                                   \
+            ((cur->leftNode == nullptr) ? nullptr                              \
+                                        : (&(cur->leftNode->treeKey))),        \
+            ((cur->rightNode == nullptr) ? nullptr                             \
+                                         : (&(cur->rightNode->treeKey))));     \
+        if (cmp(cur->treeKey, key)) {                                          \
+            *a = cur;                                                          \
+            split_##_name(this, (*a)->rightNode, key, &((*a)->rightNode), b);  \
+            _pullUp(                                                           \
+                &((*a)->treeKey),                                              \
+                (((*a)->leftNode == nullptr) ? nullptr                         \
+                                             : (&((*a)->leftNode->treeKey))),  \
+                (((*a)->rightNode == nullptr)                                  \
+                     ? nullptr                                                 \
+                     : (&((*a)->rightNode->treeKey))));                        \
+        } else {                                                               \
+            *b = cur;                                                          \
+            split_##_name(this, (*b)->leftNode, key, a, &((*b)->leftNode));    \
+            _pullUp(                                                           \
+                &((*b)->treeKey),                                              \
+                (((*b)->leftNode == nullptr) ? nullptr                         \
+                                             : (&((*b)->leftNode->treeKey))),  \
+                (((*b)->rightNode == nullptr)                                  \
+                     ? nullptr                                                 \
+                     : (&((*b)->rightNode->treeKey))));                        \
+        }                                                                      \
+    }                                                                          \
+    _name* create_treap_##_name() {                                            \
+        srand(time(NULL));                                                     \
+        _name* treap = malloc(sizeof(_name));                                  \
+        treap->tree = nullptr;                                                 \
+        treap->build = &build_##_name;                                         \
+        treap->merge = &merge_##_name;                                         \
+        treap->split = &split_##_name;                                         \
+        return treap;                                                          \
+    }
 #endif
