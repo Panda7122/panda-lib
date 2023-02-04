@@ -1,10 +1,13 @@
 # panda.h README
-## Set up
+---
+# Set up
 Download and put panda.c and panda.h in the Floder which your program at
-## Compile
+# Compile
 include "panda.h" in your program
 gcc panda.c yourfile -o filename
-## How to use
+# How to use
+---
+## Data Structure
 ### vector
 #### declare
 define the struct
@@ -176,6 +179,10 @@ define the struct
 `Priority_Queue(dataType, structName, compareFunctionofData);`
 declare the priorityqueue
 `structName* priorityqueueName = create_priority_queue_structName();`
+compare function
+`bool compare(type A, type B);`
+`if A have higher priority return 1, else return 0`
+
 #### function
 ##### push
 Inserts a new element in the priority_queue. The content of this new element is initialized to val.
@@ -203,6 +210,9 @@ define the struct
 `Set(dataType, structName, compareFunctionofData);`
 declare the set
 `structName* setName = create_set_structName();`
+compare function
+`bool compare(type A, type B);`
+`if A is smaller return 1, else return 0`
 #### function
 ##### insert 
 Inserts element(s) into the container, if the container doesn't already contain an element with an equivalent key.
@@ -232,12 +242,17 @@ Returns an iterator pointing to the first element that is greater than key
 Returns the number of elements in the container
 `setName->size;`
 ### map(WIP)
+:::danger
 It can't run now
 and I don't know why
+:::
 define the struct
 `Map(indexType, valueType, structName, compareFunctionofData);`
 declare the map
 `structName* mapName = create_map_structName();`
+compare function
+`bool compare(indexType A, indexType B);`
+`if A is smaller return 1, else return 0`
 #### function
 ##### insert 
 Inserts element(s) into the container, if the container doesn't already contain an element with an equivalent key.
@@ -272,6 +287,83 @@ Returns an iterator pointing to the first element that is greater than key
 ##### size
 Returns the number of elements in the container
 `mapName->size;`
+### Treap
+define the struct
+`Treap(dataType, structName, compareFunctionofData, pullUpFunctionofData, pushDownFunctionofData);`
+declare the treap
+`structName* treapName = create_treap_structName();`
+compare function
+`bool compare(dataType A, dataType B);`
+`if A have higher priority return 1, else return 0`
+pullUP function
+`void pullup(data *A, data *AleftNode, data *ArightNode);`
+```
+update A from its children
+ex: interval sum
+void pullUp(data* A, data* AleftNode, data* ArightNode) {
+    A->size = 1;
+    A->sum = a->val;
+    if (AleftNode != nullptr) A->size += AleftNode->size;
+    if (ArightNode != nullptr) A->size += ArightNode->size;
+    if (AleftNode != nullptr) {
+        A->sum += (AleftNode->sum);
+        if (AleftNode->tag) {
+            A->sum += (AleftNode->tag) * (AleftNode->size);
+        }
+    }
+    if (ArightNode != nullptr) {
+        A->sum += (ArightNode->sum);
+        if (ArightNode->tag) {
+            A->sum += (ArightNode->tag) * (ArightNode->size);
+        }
+    }
+    return;
+} 
+```
+pushDown function
+`void pushDown(data *A, data *AleftNode, data *ArightNode);`
+```
+A is updated, push the data down to its children
+ex: lazytag of interval sum
+void pushDown(data* A, data* AleftNode, data* ArightNode) {
+    if (A->tag) {
+        A->sum += (A->tag) * (A->size);
+        A->val += (A->tag);
+        if (AleftNode != nullptr) AleftNode->tag += (A->tag);
+        if (ArightNode != nullptr) ArightNode->tag += (A->tag);
+        A->tag = 0;
+    }
+    return;
+} 
+```
+#### structure
+node_structName:
+*  data treeKey
+*  node_structName* leftNode, *RightNode
+*  int heapkey
+#### function
+##### build
+Return a node pointer point to a new node of treap
+`node_structName* nodeName = treapName->build(treapName, data);`
+##### merge
+Return a node pointer point a new root of treap that merge two given treap
+`node_structName* newRoot = treapName->merge(treapName, treapA, treapB);`
+:::warning
+treapA and treapB is node_structName\*
+:::
+##### split
+split a treap to two treap by key that you give
+`treapName->split(treapName, originalTreapRoot, key, newTreapRootA, newTreapRootB);`
+
+:::warning
+newTreapRootA and newTreapRootB is \*node_structName's address
+ex:
+node_structName \*newNodeA, \*newNodeB
+treap->split(treap, treap->treap, key, &newNodeA, &newNodeB)
+:::
+
+---
+## algorithm
 ### lower_bound(\*first, \*last, v)
 Returns an iterator pointing to the first element in the range \[first,last) which does not compare less than v.
 The elements in the range shall already be sorted according to this same criterion
@@ -286,3 +378,8 @@ Exchanges the given values.
 Returns the greater of the given values.
 ### min(a, b)
 Returns the smaller of the given values.
+
+---
+## variable
+### nullptr
+(void*)0
