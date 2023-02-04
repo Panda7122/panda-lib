@@ -383,3 +383,5 @@ Returns the smaller of the given values.
 ## variable
 ### nullptr
 (void*)0
+---
+[ReadMe](https://hackmd.io/@ckcsc33-blackpanda/SkYqb16cj)
