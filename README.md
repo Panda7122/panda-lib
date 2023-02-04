@@ -242,10 +242,9 @@ Returns an iterator pointing to the first element that is greater than key
 Returns the number of elements in the container
 `setName->size;`
 ### map(WIP)
-:::danger
 It can't run now
 and I don't know why
-:::
+
 define the struct
 `Map(indexType, valueType, structName, compareFunctionofData);`
 declare the map
@@ -355,12 +354,13 @@ treapA and treapB is node_structName\*
 split a treap to two treap by key that you give
 `treapName->split(treapName, originalTreapRoot, key, newTreapRootA, newTreapRootB);`
 
-:::warning
-newTreapRootA and newTreapRootB is \*node_structName's address
+warning
+```
+newTreapRootA and newTreapRootB is *node_structName's address
 ex:
 node_structName \*newNodeA, \*newNodeB
 treap->split(treap, treap->treap, key, &newNodeA, &newNodeB)
-:::
+```
 
 ---
 ## algorithm
