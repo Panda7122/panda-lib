@@ -358,7 +358,7 @@ warning
 ```
 newTreapRootA and newTreapRootB is *node_structName's address
 ex:
-node_structName \*newNodeA, \*newNodeB
+node_structName *newNodeA, *newNodeB
 treap->split(treap, treap->treap, key, &newNodeA, &newNodeB)
 ```
 
