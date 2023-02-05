@@ -1,5 +1,7 @@
 # panda.h README
+
 ---
+
 # Set up
 Download and put panda.c and panda.h in the Floder which your program at
 # Compile
@@ -211,8 +213,11 @@ define the struct
 declare the set
 `structName* setName = create_set_structName();`
 compare function
-`bool compare(type A, type B);`
-`if A is smaller return 1, else return 0`
+`int compare(type A, type B);`
+* A>B return 1
+* A==B return 0
+* A<B return -1
+
 #### function
 ##### insert 
 Inserts element(s) into the container, if the container doesn't already contain an element with an equivalent key.
@@ -241,17 +246,17 @@ Returns an iterator pointing to the first element that is greater than key
 ##### size
 Returns the number of elements in the container
 `setName->size;`
-### map(WIP)
-It can't run now
-and I don't know why
-
+### map
 define the struct
 `Map(indexType, valueType, structName, compareFunctionofData);`
 declare the map
 `structName* mapName = create_map_structName();`
 compare function
 `bool compare(indexType A, indexType B);`
-`if A is smaller return 1, else return 0`
+* A>B return 1
+* A==B return 0
+* A<B return -1
+
 #### function
 ##### insert 
 Inserts element(s) into the container, if the container doesn't already contain an element with an equivalent key.
@@ -296,7 +301,7 @@ compare function
 `if A have higher priority return 1, else return 0`
 pullUP function
 `void pullup(data *A, data *AleftNode, data *ArightNode);`
-```
+```c
 update A from its children
 ex: interval sum
 void pullUp(data* A, data* AleftNode, data* ArightNode) {
@@ -321,7 +326,7 @@ void pullUp(data* A, data* AleftNode, data* ArightNode) {
 ```
 pushDown function
 `void pushDown(data *A, data *AleftNode, data *ArightNode);`
-```
+```c
 A is updated, push the data down to its children
 ex: lazytag of interval sum
 void pushDown(data* A, data* AleftNode, data* ArightNode) {
@@ -347,20 +352,23 @@ Return a node pointer point to a new node of treap
 ##### merge
 Return a node pointer point a new root of treap that merge two given treap
 `node_structName* newRoot = treapName->merge(treapName, treapA, treapB);`
-:::warning
-treapA and treapB is node_structName\*
-:::
+```
+warning
+treapA and treapB is node_structName*
+```
 ##### split
 split a treap to two treap by key that you give
 `treapName->split(treapName, originalTreapRoot, key, newTreapRootA, newTreapRootB);`
-
-warning
 ```
+warning
 newTreapRootA and newTreapRootB is *node_structName's address
 ex:
 node_structName *newNodeA, *newNodeB
 treap->split(treap, treap->treap, key, &newNodeA, &newNodeB)
 ```
+##### free
+free the container
+`treapName->free(treapName);`
 
 ---
 ## algorithm
@@ -383,5 +391,6 @@ Returns the smaller of the given values.
 ## variable
 ### nullptr
 (void*)0
+
 ---
 [ReadMe](https://hackmd.io/@ckcsc33-blackpanda/SkYqb16cj)
