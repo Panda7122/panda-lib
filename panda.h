@@ -1721,6 +1721,7 @@ void* UPPER_BOUND_DEFAULT(void*, void*, void*, size_t,
         treap->build = &build_##_name;                                         \
         treap->merge = &merge_##_name;                                         \
         treap->split = &split_##_name;                                         \
+        treap->free = &free_##_name;                                           \
         return treap;                                                          \
     }
 #endif
