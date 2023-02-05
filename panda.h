@@ -32,8 +32,10 @@ void* UPPER_BOUND_DEFAULT(void*, void*, void*, size_t,
     if (sizeof(a) == sizeof(b)) {        \
         printf("%d \n", sizeof(a));      \
         SWAP_DEFAULT(&a, &b, sizeof(a)); \
-    } else                               \
-        SWAP_ERROR;
+    } else {                             \
+        SWAP_ERROR;                      \
+        exit(1);                         \
+    }
 // generic max
 #define MAX_DEFAULT(a, b) (a > b ? a : b)
 #define max(a, b) MAX_DEFAULT(a, b)
@@ -41,7 +43,9 @@ void* UPPER_BOUND_DEFAULT(void*, void*, void*, size_t,
 #define MIN_DEFAULT(a, b) (a < b ? a : b)
 #define min(a, b) MIN_DEFAULT(a, b)
 // generic sort
-#define SORT_ERROR printf("at %d sort error\n", __LINE__)
+#define SORT_ERROR                          \
+    printf("at %d sort error\n", __LINE__); \
+    exit(1)
 #define sort(a, b) \
     _Generic((a), int*                            \
              : (_Generic((b), int*                \
@@ -81,7 +85,9 @@ void* UPPER_BOUND_DEFAULT(void*, void*, void*, size_t,
                          : SORT_ERROR)))
 
 // generic lower_bound
-#define LOWER_BOUND_ERROR printf("at %d lower_bound error\n", __LINE__)
+#define LOWER_BOUND_ERROR                          \
+    printf("at %d lower_bound error\n", __LINE__); \
+    exit(1)
 #define lower_bound(a, b, v) \
     _Generic((a), int*                            \
              : (_Generic((b), int*                \
@@ -183,7 +189,9 @@ void* UPPER_BOUND_DEFAULT(void*, void*, void*, size_t,
                          : LOWER_BOUND_ERROR, int*\
                          : LOWER_BOUND_ERROR)))
 // generic upper_bound
-#define UPPER_BOUND_ERROR printf("at %d upper_bound error\n", __LINE__)
+#define UPPER_BOUND_ERROR                          \
+    printf("at %d upper_bound error\n", __LINE__); \
+    exit(1)
 #define upper_bound(a, b, v) \
     _Generic((a), int*                            \
              : (_Generic((b), int*                \
@@ -881,7 +889,7 @@ void* UPPER_BOUND_DEFAULT(void*, void*, void*, size_t,
         }                                                                      \
         if (set->tree[now].value == elm)                                       \
             return;                                                            \
-        else if (_cmp(set->tree[now].value, elm)) {                            \
+        else if (_cmp(set->tree[now].value, elm) > 0) {                        \
             if (set->tree[now].left == -1) set->tree[now].left = set->size;    \
             push_##_name(set, elm, set->tree[now].left);                       \
         } else {                                                               \
@@ -1021,7 +1029,7 @@ void* UPPER_BOUND_DEFAULT(void*, void*, void*, size_t,
             }                                                                  \
             --(set->size);                                                     \
             return;                                                            \
-        } else if (_cmp(set->tree[now].value, elm)) {                          \
+        } else if (_cmp(set->tree[now].value, elm) > 0) {                      \
             if (set->tree[now].left != -1) {                                   \
                 pop_##_name(set, elm, set->tree[now].left);                    \
             }                                                                  \
@@ -1110,35 +1118,35 @@ void* UPPER_BOUND_DEFAULT(void*, void*, void*, size_t,
         int64_t now = 0;                                                       \
         int64_t father = -1;                                                   \
         while (set->tree[now].height != -1) {                                  \
-            if (set->tree[now].value == value)                                 \
-                return now;                                                    \
-            else if (_cmp((set->tree[now]).value, value)) {                    \
-                if (set->tree[now].left == -1) return now;                     \
-                father = now;                                                  \
-                now = set->tree[now].left;                                     \
-            } else if (set->tree[now].right != NULL) {                         \
-                father = now;                                                  \
-                now = set->tree[now].right;                                    \
-            } else                                                             \
-                return father;                                                 \
-        }                                                                      \
-        return NULL;                                                           \
-    }                                                                          \
-    node_##_name* upper_bound_##_name(_name* set, _type value) {               \
-        int64_t now = 0;                                                       \
-        int64_t father = -1;                                                   \
-        while (now != NULL) {                                                  \
-            if (_cmp(set->tree[now].value, value)) {                           \
-                if (set->tree[now].left == -1) return now;                     \
+            if (_cmp((set->tree[now]).value, value) == 0)                      \
+                return &set->tree[now];                                        \
+            else if (_cmp((set->tree[now]).value, value) > 0) {                \
+                if (set->tree[now].left == -1) return &set->tree[now];         \
                 father = now;                                                  \
                 now = set->tree[now].left;                                     \
             } else if (set->tree[now].right != -1) {                           \
                 father = now;                                                  \
                 now = set->tree[now].right;                                    \
             } else                                                             \
-                return father;                                                 \
+                return &set->tree[father];                                     \
         }                                                                      \
-        return NULL;                                                           \
+        return &set->tree[set->size];                                          \
+    }                                                                          \
+    node_##_name* upper_bound_##_name(_name* set, _type value) {               \
+        int64_t now = 0;                                                       \
+        int64_t father = -1;                                                   \
+        while (set->tree[now].height != -1) {                                  \
+            if (_cmp(set->tree[now].value, value) > 0) {                       \
+                if (set->tree[now].left == -1) return &set->tree[now];         \
+                father = now;                                                  \
+                now = set->tree[now].left;                                     \
+            } else if (set->tree[now].right != -1) {                           \
+                father = now;                                                  \
+                now = set->tree[now].right;                                    \
+            } else                                                             \
+                return &set->tree[father];                                     \
+        }                                                                      \
+        return &set->tree[set->size];                                          \
     }                                                                          \
     _name* create_set_##_name() {                                              \
         _name* set = malloc(sizeof(_name));                                    \
@@ -1273,10 +1281,10 @@ void* UPPER_BOUND_DEFAULT(void*, void*, void*, size_t,
             map->tree[now].bf = 0;                                             \
             return;                                                            \
         }                                                                      \
-        if (map->tree[now].index == idx) {                                     \
+        if (_cmp(map->tree[now].index, idx) == 0) {                            \
             map->tree[now].value = elm;                                        \
             return;                                                            \
-        } else if (_cmp(map->tree[now].index, idx)) {                          \
+        } else if (_cmp(map->tree[now].index, idx) > 0) {                      \
             if (map->tree[now].left == -1) map->tree[now].left = map->size;    \
             push_##_name(map, idx, elm, map->tree[now].left);                  \
         } else {                                                               \
@@ -1421,7 +1429,7 @@ void* UPPER_BOUND_DEFAULT(void*, void*, void*, size_t,
             }                                                                  \
             --(map->size);                                                     \
             return;                                                            \
-        } else if (_cmp(map->tree[now].index, idx)) {                          \
+        } else if (_cmp(map->tree[now].index, idx) > 0) {                      \
             if (map->tree[now].left != -1) {                                   \
                 pop_##_name(map, idx, map->tree[now].left);                    \
             }                                                                  \
@@ -1484,7 +1492,7 @@ void* UPPER_BOUND_DEFAULT(void*, void*, void*, size_t,
         size_t now = 0;                                                        \
         while (map->tree[now].height != -1) {                                  \
             if (map->tree[now].index == idx) return 1;                         \
-            if (map->tree[now].index > idx)                                    \
+            if (_cmp(map->tree[now].index, idx) > 0)                           \
                 if (map->tree[now].left != -1)                                 \
                     now = map->tree[now].left;                                 \
                 else                                                           \
@@ -1500,7 +1508,7 @@ void* UPPER_BOUND_DEFAULT(void*, void*, void*, size_t,
         size_t now = 0;                                                        \
         while (map->tree[now].height != -1) {                                  \
             if (map->tree[now].index == idx) return map->tree[now].value;      \
-            if (map->tree[now].index > idx)                                    \
+            if (_cmp(map->tree[now].index, idx) > 0)                           \
                 if (map->tree[now].left != -1)                                 \
                     now = map->tree[now].left;                                 \
                 else                                                           \
@@ -1510,7 +1518,7 @@ void* UPPER_BOUND_DEFAULT(void*, void*, void*, size_t,
             else                                                               \
                 break;                                                         \
         }                                                                      \
-        return NULL;                                                           \
+        exit(1);                                                               \
     }                                                                          \
     void set_##_name(_name* map, _typeOfIndex idx, _typeOfValue elm) {         \
         size_t now = 0;                                                        \
@@ -1519,7 +1527,7 @@ void* UPPER_BOUND_DEFAULT(void*, void*, void*, size_t,
                 map->tree[now].value = elm;                                    \
                 return;                                                        \
             }                                                                  \
-            if (map->tree[now].index > idx)                                    \
+            if (_cmp(map->tree[now].index, idx) > 0)                           \
                 if (map->tree[now].left != -1)                                 \
                     now = map->tree[now].left;                                 \
                 else                                                           \
@@ -1545,35 +1553,35 @@ void* UPPER_BOUND_DEFAULT(void*, void*, void*, size_t,
         int64_t now = 0;                                                       \
         int64_t father = -1;                                                   \
         while (map->tree[now].height != -1) {                                  \
-            if (map->tree[now].index == index)                                 \
-                return now;                                                    \
-            else if (_cmp((map->tree[now]).index, index)) {                    \
-                if (map->tree[now].left == -1) return now;                     \
-                father = now;                                                  \
-                now = map->tree[now].left;                                     \
-            } else if (map->tree[now].right != NULL) {                         \
-                father = now;                                                  \
-                now = map->tree[now].right;                                    \
-            } else                                                             \
-                return father;                                                 \
-        }                                                                      \
-        return NULL;                                                           \
-    }                                                                          \
-    node_##_name* upper_bound_##_name(_name* map, _typeOfIndex index) {        \
-        int64_t now = 0;                                                       \
-        int64_t father = -1;                                                   \
-        while (now != NULL) {                                                  \
-            if (_cmp(map->tree[now].index, index)) {                           \
-                if (map->tree[now].left == -1) return now;                     \
+            if (_cmp((map->tree[now]).index, index) == 0)                      \
+                return &map->tree[now];                                        \
+            else if (_cmp((map->tree[now]).index, index) > 0) {                \
+                if (map->tree[now].left == -1) return &map->tree[now];         \
                 father = now;                                                  \
                 now = map->tree[now].left;                                     \
             } else if (map->tree[now].right != -1) {                           \
                 father = now;                                                  \
                 now = map->tree[now].right;                                    \
             } else                                                             \
-                return father;                                                 \
+                return &map->tree[father];                                     \
         }                                                                      \
-        return NULL;                                                           \
+        return &map->tree[map->size];                                          \
+    }                                                                          \
+    node_##_name* upper_bound_##_name(_name* map, _typeOfIndex index) {        \
+        int64_t now = 0;                                                       \
+        int64_t father = -1;                                                   \
+        while (map->tree[now].height != -1) {                                  \
+            if (_cmp(map->tree[now].index, index) > 0) {                       \
+                if (map->tree[now].left == -1) return &map->tree[now];         \
+                father = now;                                                  \
+                now = map->tree[now].left;                                     \
+            } else if (map->tree[now].right != -1) {                           \
+                father = now;                                                  \
+                now = map->tree[now].right;                                    \
+            } else                                                             \
+                return &map->tree[father];                                     \
+        }                                                                      \
+        return &map->tree[map->size];                                          \
     }                                                                          \
     _name* create_map_##_name() {                                              \
         _name* map = malloc(sizeof(_name));                                    \
@@ -1618,6 +1626,7 @@ void* UPPER_BOUND_DEFAULT(void*, void*, void*, size_t,
                                node_##_name* b);                               \
         void (*split)(struct _name * this, node_##_name* cur, _type key,       \
                       node_##_name** a, node_##_name** b);                     \
+        void (*free)(struct _name * this);                                     \
     } _name;                                                                   \
     _name* create_treap_##_name();                                             \
     node_##_name* build_##_name(struct _name* treap, data key) {               \
@@ -1672,7 +1681,7 @@ void* UPPER_BOUND_DEFAULT(void*, void*, void*, size_t,
                                         : (&(cur->leftNode->treeKey))),        \
             ((cur->rightNode == nullptr) ? nullptr                             \
                                          : (&(cur->rightNode->treeKey))));     \
-        if (cmp(cur->treeKey, key)) {                                          \
+        if (_cmp(cur->treeKey, key)) {                                         \
             *a = cur;                                                          \
             split_##_name(treap, (*a)->rightNode, key, &((*a)->rightNode), b); \
             _pullUp(                                                           \
@@ -1693,6 +1702,17 @@ void* UPPER_BOUND_DEFAULT(void*, void*, void*, size_t,
                      ? nullptr                                                 \
                      : (&((*b)->rightNode->treeKey))));                        \
         }                                                                      \
+    }                                                                          \
+    void free_node_##_name(node_##_name* nowNode) {                            \
+        if (nowNode == nullptr) return;                                        \
+        free_node_##_name(nowNode->leftNode);                                  \
+        free_node_##_name(nowNode->righttNode);                                \
+        free(nowNode);                                                         \
+        return;                                                                \
+    }                                                                          \
+    void free_##_name(struct _name* treap) {                                   \
+        free_node_##_name(treap->tree);                                        \
+        free(treap);                                                           \
     }                                                                          \
     _name* create_treap_##_name() {                                            \
         srand(time(NULL));                                                     \
